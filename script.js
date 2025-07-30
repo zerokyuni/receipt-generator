@@ -93,10 +93,10 @@ document.addEventListener('DOMContentLoaded', function () {
             const itemTotal = row.querySelector('.item-total').value;
             itemsHtml += `
                 <tr>
-                    <td style="text-align: left; padding: 5px 2px; width: 40%;">${name}</td>
-                    <td style="text-align: right; padding: 5px 2px; width: 20%;">${price}</td>
-                    <td style="text-align: right; padding: 5px 2px; width: 15%;">${quantity}</td>
-                    <td style="text-align: right; padding: 5px 2px; width: 25%;">${itemTotal}</td>
+                    <td style="text-align: left; padding: 4px 2px; width: 40%;">${name}</td>
+                    <td style="text-align: right; padding: 4px 2px; width: 20%;">${price}</td>
+                    <td style="text-align: right; padding: 4px 2px; width: 15%;">${quantity}</td>
+                    <td style="text-align: right; padding: 4px 2px; width: 25%;">${itemTotal}</td>
                 </tr>
             `;
         });
@@ -123,43 +123,44 @@ document.addEventListener('DOMContentLoaded', function () {
                         body { background-color: #f0f0f0; padding: 20px; }
                         .receipt-container {
                             width: 100%;
-                            max-width: 420px;
-                            padding: 25px;
+                            max-width: 320px; /* 모바일 화면에서 보기 좋은 너비로 조정 */
+                            padding: 20px;
                             background-color: #fff;
                             box-shadow: 0 0 15px rgba(0,0,0,0.1);
-                            font-size: 15px;
+                            font-size: 14px;
                             line-height: 1.6;
                         }
                     }
+                    /* 55mm 프린터에 최적화된 인쇄 스타일 */
                     @media print {
                         body { background-color: #fff; padding: 0; }
                         .receipt-container {
-                            width: 280px;
-                            padding: 10px;
+                            width: 200px; /* 55mm 용지에 맞춘 너비 (약 207px) */
+                            padding: 5px;
                             box-shadow: none;
-                            font-size: 10px;
+                            font-size: 12px; /* 기본 폰트 크기 증가 */
                             line-height: 1.4;
                         }
                     }
                     .center { text-align: center; }
                     .left { text-align: left; }
                     .right { text-align: right; }
-                    .header { margin-bottom: 20px; }
-                    .logo { max-width: 150px; max-height: 80px; margin: 0 auto 10px; display: block; }
-                    .info-section { margin-bottom: 15px; }
-                    .items-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-                    .items-table th, .items-table td { padding: 6px 0; }
+                    .header { margin-bottom: 15px; }
+                    .logo { max-width: 120px; max-height: 60px; margin: 0 auto 10px; display: block; }
+                    .info-section { margin-bottom: 10px; }
+                    .items-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+                    .items-table th, .items-table td { padding: 4px 0; }
                     .items-table thead tr { border-top: 1px dashed #000; border-bottom: 1px dashed #000; }
-                    .totals-section { border-top: 1px dashed #000; padding-top: 10px; margin-top: 15px; }
-                    .totals-section div { display: flex; justify-content: space-between; padding: 3px 0; }
-                    .footer { border-top: 1px dashed #000; padding-top: 10px; margin-top: 20px; }
+                    .totals-section { border-top: 1px dashed #000; padding-top: 8px; margin-top: 10px; }
+                    .totals-section div { display: flex; justify-content: space-between; padding: 2px 0; }
+                    .footer { border-top: 1px dashed #000; padding-top: 8px; margin-top: 15px; }
                 </style>
             </head>
             <body>
                 <div class="receipt-container">
                     <div class="header center">
                         ${logoBase64 ? `<img src="${logoBase64}" alt="logo" class="logo">` : ''}
-                        <h2 style="font-size: 1.5em; margin: 0;">${storeName}</h2>
+                        <h2 style="font-size: 1.4em; margin: 0; font-weight: bold;">${storeName}</h2>
                         <p style="margin: 2px 0;">${storeInfo}</p>
                         <p style="margin: 2px 0;">${storeAddress}</p>
                         <p style="margin: 2px 0;">TEL: ${storePhone}</p>
@@ -183,7 +184,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <div class="totals-section">
                         <div><span>합계:</span><span>${subtotal}</span></div>
                         <div><span>부가세:</span><span>${tax}</span></div>
-                        <div style="font-size: 1.2em;"><strong>최종 합계:</strong><strong>${total}</strong></div>
+                        <div style="font-size: 1.2em; font-weight: bold;"><strong>최종 합계:</strong><strong>${total}</strong></div>
                     </div>
                     <div class="footer center">
                         <p><strong>결제수단:</strong> ${paymentMethod}</p>
@@ -220,37 +221,37 @@ document.addEventListener('DOMContentLoaded', function () {
             const receiptBody = iframe.contentWindow.document.body;
             const receiptContainer = receiptBody.querySelector('.receipt-container');
             
+            // PDF 생성을 위해 인쇄용 스타일 강제 적용
             receiptBody.style.backgroundColor = '#fff';
             receiptBody.style.padding = '0';
-            receiptContainer.style.width = '280px';
-            receiptContainer.style.padding = '10px';
-            receiptContainer.style.fontSize = '10px';
+            receiptContainer.style.width = '200px';
+            receiptContainer.style.padding = '5px';
+            receiptContainer.style.fontSize = '12px';
             receiptContainer.style.lineHeight = '1.4';
             receiptContainer.style.boxShadow = 'none';
 
             html2canvas(receiptContainer, {
-                scale: 2,
+                scale: 3, // 해상도를 더 높여 작은 글씨도 선명하게
                 useCORS: true
             }).then(canvas => {
                 const imgData = canvas.toDataURL('image/png');
                 const { jsPDF } = window.jspdf;
                 
-                // 이미지 속성을 가져와서 실제 높이를 계산합니다.
                 const tempPdf = new jsPDF();
                 const imgProps = tempPdf.getImageProperties(imgData);
-                const pdfWidth = 76; // 80mm 페이지 너비 - 4mm 여백
+                const pdfWidth = 51; // 55mm 페이지 너비 - 4mm 여백
                 const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
                 const pageHeight = pdfHeight + 4; // 상하 여백 4mm 추가
 
-                // 계산된 높이로 PDF 문서를 생성합니다.
+                // 55mm 너비에 맞춰 PDF 문서 생성
                 const pdf = new jsPDF({
                     orientation: 'portrait',
                     unit: 'mm',
-                    format: [80, pageHeight] // 고정된 A4 높이 대신 계산된 높이 사용
+                    format: [55, pageHeight]
                 });
 
                 pdf.addImage(imgData, 'PNG', 2, 2, pdfWidth, pdfHeight);
-                pdf.save('receipt.pdf');
+                pdf.save('receipt_55mm.pdf');
 
                 document.body.removeChild(iframe);
             });
