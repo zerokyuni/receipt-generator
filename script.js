@@ -146,7 +146,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     .left { text-align: left; }
                     .right { text-align: right; }
                     .header { margin-bottom: 15px; }
-                    .logo { max-width: 120px; max-height: 60px; margin: 0 auto 10px; display: block; }
+                    /* 로고 스타일 수정: 너비를 100%로 채우고 높이는 자동으로 조절 */
+                    .logo { max-width: 100%; height: auto; margin: 0 auto 10px; display: block; }
                     .info-section { margin-bottom: 10px; }
                     .items-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
                     .items-table th, .items-table td { padding: 4px 0; }
