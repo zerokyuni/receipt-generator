@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>커스텀 영수증 생성기</title>
+    <!-- Tailwind CSS 로드 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts (Inter) 로드 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- PDF 생성을 위한 라이브러리 로드 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        /* 기본 폰트 설정 */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* 입력 필드 기본 스타일 */
+        .form-input {
+            @apply w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500;
+        }
+        .form-label {
+            @apply block text-sm font-medium text-gray-700 mb-1;
+        }
+        .item-label {
+            @apply block text-xs font-medium text-gray-500 mb-1;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <div class="container mx-auto max-w-2xl p-4 sm:p-6 lg:p-8">
+        <div class="bg-white p-8 rounded-lg shadow-md">
+            <h1 class="text-2xl font-bold text-gray-900 mb-6 text-center">커스텀 영수증 생성기</h1>
+
+            <!-- 영수증 정보 입력 폼 -->
+            <form id="receipt-form" class="space-y-6">
+
+                <!-- 1. 상단 정보 -->
+                <fieldset class="border-t border-gray-200 pt-6">
+                    <legend class="text-lg font-semibold text-gray-800">상단 정보</legend>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+                        <div>
+                            <label for="store-name" class="form-label">상호명</label>
+                            <input type="text" id="store-name" class="form-input" placeholder="예: 행복 마트">
+                        </div>
+                        <div>
+                            <label for="store-info" class="form-label">사업자 정보</label>
+                            <input type="text" id="store-info" class="form-input" placeholder="예: 123-45-67890 홍길동">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label for="store-address" class="form-label">주소</label>
+                            <input type="text" id="store-address" class="form-input" placeholder="예: 서울특별시 행복구 미소동 123-4">
+                        </div>
+                        <div>
+                            <label for="store-phone" class="form-label">전화번호</label>
+                            <input type="text" id="store-phone" class="form-input" placeholder="예: 02-1234-5678">
+                        </div>
+                        <div>
+                            <label for="receipt-datetime" class="form-label">날짜 및 시간</label>
+                            <input type="datetime-local" id="receipt-datetime" class="form-input">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label for="logo-upload" class="form-label">로고 이미지 (선택)</label>
+                            <input type="file" id="logo-upload" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100">
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!-- 2. 상품 목록 (CSS Grid 구조) -->
+                <fieldset class="border-t border-gray-200 pt-6">
+                    <legend class="text-lg font-semibold text-gray-800">상품 목록</legend>
+                    <div id="item-list" class="mt-4 space-y-4">
+                        <!-- JavaScript로 상품 항목이 여기에 추가됩니다. -->
+                    </div>
+                    <button type="button" id="add-item-btn" class="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 text-sm font-medium">
+                        + 상품 추가
+                    </button>
+                </fieldset>
+
+                <!-- 3. 하단 정보 및 합계 -->
+                <fieldset class="border-t border-gray-200 pt-6">
+                    <legend class="text-lg font-semibold text-gray-800">하단 정보 및 합계</legend>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+                        <div>
+                            <label for="payment-method" class="form-label">결제 수단</label>
+                            <input type="text" id="payment-method" class="form-input" placeholder="예: 신용카드">
+                        </div>
+                        <div>
+                            <label for="promo-message" class="form-label">이벤트 및 안내 문구</label>
+                            <input type="text" id="promo-message" class="form-input" placeholder="예: 찾아주셔서 감사합니다.">
+                        </div>
+                    </div>
+                    <div class="mt-6 border-t border-gray-200 pt-6 space-y-4">
+                        <div>
+                            <label for="subtotal-input" class="form-label text-right">합계</label>
+                            <input type="text" id="subtotal-input" class="form-input text-right" placeholder="예: 10,000원">
+                        </div>
+                        <div>
+                            <label for="tax-input" class="form-label text-right">부가세</label>
+                            <input type="text" id="tax-input" class="form-input text-right" placeholder="예: 1,000원">
+                        </div>
+                        <div>
+                            <label for="total-input" class="form-label text-right">최종 합계</label>
+                            <input type="text" id="total-input" class="form-input text-right font-bold text-lg" placeholder="예: 11,000원 또는 뽀뽀 5번">
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!-- 4. 버튼 영역 -->
+                <div class="pt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button type="button" id="generate-btn" class="w-full px-8 py-3 bg-green-600 text-white text-lg font-semibold rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                        영수증 생성 (새 창)
+                    </button>
+                    <button type="button" id="pdf-download-btn" class="w-full px-8 py-3 bg-blue-600 text-white text-lg font-semibold rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        PDF로 다운로드
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript 파일 연결 -->
+    <script src="script.js"></script>
+</body>
+</html>
